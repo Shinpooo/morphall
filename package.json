@@ -9,9 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@morpho-org/blue-sdk": "^5.10.0",
+    "@morpho-org/blue-sdk-viem": "^4.2.0",
+    "@morpho-org/morpho-ts": "^2.4.6",
+    "@reown/appkit": "^1.8.15",
+    "@reown/appkit-adapter-wagmi": "^1.8.15",
+    "@tanstack/react-query": "^5.90.15",
+    "dotenv": "^17.2.3",
     "next": "16.1.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "viem": "^2.43.3",
+    "wagmi": "^3.1.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
