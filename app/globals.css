@@ -6,19 +6,23 @@
   --muted: #a1a1aa;
   --panel: #15171b;
   --panel-border: rgba(255, 255, 255, 0.08);
+  --accent: #f6b3d7;
+  --font-sans: var(--font-milligram), "SF Pro Display", "Helvetica Neue",
+    "Segoe UI", sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", "Menlo", monospace;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   letter-spacing: -0.01em;
 }
 
@@ -29,4 +33,58 @@ body {
 ::selection {
   background: rgba(226, 115, 143, 0.3);
   color: #ffffff;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fade-up 0.7s ease-out both;
+  animation-delay: 120ms;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fade-up 0.7s ease-out both;
+  animation-delay: 240ms;
+}
+
+.animate-shimmer {
+  background-size: 200% 200%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.wallet-pill button,
+.wallet-pill [role="button"] {
+  height: 42px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: #ffe6ec;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.wallet-pill button:hover,
+.wallet-pill [role="button"]:hover {
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  color: #fff1f4;
 }

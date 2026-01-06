@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { headers } from "next/headers";
 import "./globals.css";
 import ContextProvider from "../context";
 import AppHeader from "../components/AppHeader";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const milligram = localFont({
+  src: [
+    { path: "../public/fonts/Milligram-Regular-trial.ttf", weight: "400" },
+    { path: "../public/fonts/Milligram-Medium-trial.ttf", weight: "500" },
+    { path: "../public/fonts/Milligram-Bold-trial.ttf", weight: "700" },
+    { path: "../public/fonts/Milligram-Extrabold-trial.ttf", weight: "800" },
+  ],
+  variable: "--font-milligram",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +31,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${milligram.variable} antialiased`}>
         <ContextProvider cookies={cookies}>
           <div className="relative min-h-screen overflow-hidden bg-[#0c0d0f] text-zinc-100">
             <div className="pointer-events-none absolute inset-0">

@@ -13,6 +13,14 @@ createAppKit({
   projectId,
   networks,
   defaultNetwork: networks[0],
+  themeMode: "dark",
+  themeVariables: {
+    "--apkt-accent": "#f6b3d7",
+    "--apkt-color-mix": "#000000",
+    "--apkt-color-mix-strength": 35,
+    "--apkt-border-radius-master": "999px",
+    "--apkt-font-family": "var(--font-milligram)",
+  },
   metadata: {
     name: "morphall",
     description: "Morpho vaults interface",

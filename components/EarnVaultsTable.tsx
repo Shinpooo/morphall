@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronsUpDown, ListFilter, Search } from "lucide-react";
 
 type VaultItem = {
   address: string;
@@ -245,10 +246,15 @@ export default function EarnVaultsTable({
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative" ref={statusFilterRef}>
             <button
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-zinc-500 transition hover:border-white/30"
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                selectedStatuses.size > 0
+                  ? "border-[color:var(--accent)]/40 bg-[color:var(--accent)]/10 text-[color:var(--accent)]"
+                  : "border-white/10 bg-white/5 text-zinc-500 hover:border-white/30"
+              }`}
               onClick={() => setIsStatusFilterOpen((prev) => !prev)}
               type="button"
             >
+              <ListFilter className="h-3.5 w-3.5 text-[color:var(--accent)]" />
               Status
               <span className="text-zinc-400">
                 {selectedStatuses.size > 0
@@ -289,10 +295,15 @@ export default function EarnVaultsTable({
           </div>
           <div className="relative" ref={versionFilterRef}>
             <button
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-zinc-500 transition hover:border-white/30"
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                selectedVersions.size > 0
+                  ? "border-[color:var(--accent)]/40 bg-[color:var(--accent)]/10 text-[color:var(--accent)]"
+                  : "border-white/10 bg-white/5 text-zinc-500 hover:border-white/30"
+              }`}
               onClick={() => setIsVersionFilterOpen((prev) => !prev)}
               type="button"
             >
+              <ListFilter className="h-3.5 w-3.5 text-[color:var(--accent)]" />
               Version
               <span className="text-zinc-400">
                 {selectedVersions.size > 0
@@ -333,10 +344,15 @@ export default function EarnVaultsTable({
           </div>
           <div className="relative" ref={assetFilterRef}>
             <button
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-zinc-500 transition hover:border-white/30"
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                selectedAssets.size > 0
+                  ? "border-[color:var(--accent)]/40 bg-[color:var(--accent)]/10 text-[color:var(--accent)]"
+                  : "border-white/10 bg-white/5 text-zinc-500 hover:border-white/30"
+              }`}
               onClick={() => setIsAssetFilterOpen((prev) => !prev)}
               type="button"
             >
+              <ListFilter className="h-3.5 w-3.5 text-[color:var(--accent)]" />
               Deposit
               <span className="text-zinc-400">
                 {selectedAssets.size > 0
@@ -348,7 +364,7 @@ export default function EarnVaultsTable({
             {isAssetFilterOpen ? (
               <div className="absolute left-0 top-12 z-30 w-72 rounded-2xl border border-white/10 bg-[#1f2126] p-4 shadow-xl">
                 <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-300">
-                  <span className="text-zinc-500">🔍</span>
+                  <Search className="h-4 w-4 text-zinc-500" />
                   <input
                     className="w-full bg-transparent text-sm text-zinc-200 outline-none placeholder:text-zinc-500"
                     placeholder="Search deposit asset"
@@ -388,48 +404,51 @@ export default function EarnVaultsTable({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <input
-            className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 outline-none placeholder:text-zinc-500"
-            placeholder="Filter vaults"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 transition hover:border-white/30">
+            <Search className="h-4 w-4 text-zinc-500" />
+            <input
+              className="w-full bg-transparent text-sm text-zinc-200 outline-none placeholder:text-zinc-500"
+              placeholder="Filter vaults"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </div>
         </div>
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#14161a]">
-        <div className="grid grid-cols-7 gap-4 border-b border-white/10 px-6 py-4 text-xs uppercase tracking-[0.2em] text-zinc-500">
+        <div className="grid grid-cols-7 gap-4 border-b border-white/10 bg-[color:var(--accent)]/5 px-6 py-4 text-xs uppercase tracking-[0.2em] text-zinc-500">
           <span>Vault</span>
           <button
-            className="group flex items-center gap-2 text-left"
+            className={`group flex items-center gap-2 text-left transition ${
+              sortKey === "totalAssetsUsd" ? "text-[color:var(--accent)]" : ""
+            }`}
             onClick={() => handleSort("totalAssetsUsd")}
             type="button"
           >
             Deposits
-            <span className="text-xs text-zinc-500 group-hover:text-zinc-300">
-              ↕
-            </span>
+            <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-500 transition group-hover:text-zinc-300" />
           </button>
           <button
-            className="group flex items-center gap-2 text-left"
+            className={`group flex items-center gap-2 text-left transition ${
+              sortKey === "liquidityUsd" ? "text-[color:var(--accent)]" : ""
+            }`}
             onClick={() => handleSort("liquidityUsd")}
             type="button"
           >
             Liquidity
-            <span className="text-xs text-zinc-500 group-hover:text-zinc-300">
-              ↕
-            </span>
+            <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-500 transition group-hover:text-zinc-300" />
           </button>
           <span>Asset</span>
           <button
-            className="group flex items-center gap-2 text-left"
+            className={`group flex items-center gap-2 text-left transition ${
+              sortKey === "avgNetApy" ? "text-[color:var(--accent)]" : ""
+            }`}
             onClick={() => handleSort("avgNetApy")}
             type="button"
           >
             APY
-            <span className="text-xs text-zinc-500 group-hover:text-zinc-300">
-              ↕
-            </span>
+            <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-500 transition group-hover:text-zinc-300" />
           </button>
           <span>Version</span>
           <span>Status</span>
@@ -439,7 +458,7 @@ export default function EarnVaultsTable({
             <a
               key={vault.address}
               href={`/vaults/${chainId}/${vault.address}`}
-              className="grid grid-cols-7 items-center gap-4 px-6 py-5 text-sm text-zinc-200 transition hover:bg-white/5"
+              className="group grid grid-cols-7 items-center gap-4 px-6 py-5 text-sm text-zinc-200 transition hover:bg-white/5"
             >
               <div className="space-y-1">
                 <p className="text-sm font-medium text-zinc-100">

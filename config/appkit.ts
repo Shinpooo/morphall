@@ -9,6 +9,7 @@ import {
   polygon,
   unichain,
 } from "@reown/appkit/networks";
+import type { AppKitNetwork } from "@reown/appkit/networks";
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID ?? "";
 
@@ -16,7 +17,7 @@ if (!projectId) {
   throw new Error("NEXT_PUBLIC_PROJECT_ID is not defined");
 }
 
-export const networks = [
+export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [
   mainnet,
   base,
   arbitrum,

@@ -192,6 +192,7 @@ export default function VaultActions({
       return;
     }
     if (!address) return;
+    const userAddress = address as `0x${string}`;
     if (needsApproval) {
       writeContract({
         abi: erc20Abi,
@@ -207,7 +208,7 @@ export default function VaultActions({
         abi: vaultAbi,
         address: vaultAddress,
         functionName: "deposit",
-        args: [parsedAmount, address],
+        args: [parsedAmount, userAddress],
         chainId,
       });
       return;
@@ -216,7 +217,7 @@ export default function VaultActions({
       abi: vaultAbi,
       address: vaultAddress,
       functionName: "withdraw",
-      args: [parsedAmount, address, address],
+      args: [parsedAmount, userAddress, userAddress],
       chainId,
     });
   };
@@ -236,7 +237,7 @@ export default function VaultActions({
           <button
             className={`relative pb-2 text-sm transition ${
               mode === "deposit"
-                ? "text-zinc-50 after:absolute after:left-0 after:top-full after:h-0.5 after:w-full after:bg-[#e38898]"
+                ? "text-zinc-50 after:absolute after:left-0 after:top-full after:h-0.5 after:w-full after:bg-[var(--accent)]"
                 : "text-zinc-400 hover:text-zinc-200"
             }`}
             onClick={() => setMode("deposit")}
@@ -246,7 +247,7 @@ export default function VaultActions({
           <button
             className={`relative pb-2 text-sm transition ${
               mode === "withdraw"
-                ? "text-zinc-50 after:absolute after:left-0 after:top-full after:h-0.5 after:w-full after:bg-[#e38898]"
+                ? "text-zinc-50 after:absolute after:left-0 after:top-full after:h-0.5 after:w-full after:bg-[var(--accent)]"
                 : "text-zinc-400 hover:text-zinc-200"
             }`}
             onClick={() => setMode("withdraw")}
@@ -311,8 +312,14 @@ export default function VaultActions({
         </div>
       </div>
 
+      <div className="rounded-2xl border border-[color:var(--accent)]/30 bg-[color:var(--accent)]/10 p-4 text-xs text-[color:var(--accent)]">
+        Vaults are permissionless. Morphall surfaces both whitelisted and
+        non-whitelisted vaults. Beware of malicious vaults and assess risk
+        before depositing.
+      </div>
+
       <button
-        className="w-full rounded-full border border-white/10 bg-white/5 py-4 text-sm text-zinc-100 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-zinc-500"
+        className="w-full rounded-full border border-white/10 bg-[color:var(--accent)] py-4 text-sm text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/5 disabled:text-zinc-500"
         onClick={handleAction}
         disabled={disabled}
       >

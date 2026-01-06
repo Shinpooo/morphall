@@ -15,13 +15,27 @@ import {
   isAddress,
   zeroAddress,
 } from "viem";
-import { base, mainnet } from "viem/chains";
+import type { PublicClient } from "viem";
+import {
+  arbitrum,
+  base,
+  hyperEvm,
+  mainnet,
+  monad,
+  polygon,
+  unichain,
+} from "viem/chains";
 import VaultActions from "../../../../components/VaultActions";
 import CopyButton from "../../../../components/CopyButton";
 
 const CHAIN_CONFIG = {
   1: { chain: mainnet, label: "Ethereum", rpcEnv: "RPC_URL_MAINNET" },
+  143: { chain: monad, label: "Monad", rpcEnv: "RPC_URL_MONAD" },
+  42161: { chain: arbitrum, label: "Arbitrum", rpcEnv: "RPC_URL_ARBITRUM" },
   8453: { chain: base, label: "Base", rpcEnv: "RPC_URL_BASE" },
+  999: { chain: hyperEvm, label: "HyperEVM", rpcEnv: "RPC_URL_HYPEREVM" },
+  137: { chain: polygon, label: "Polygon", rpcEnv: "RPC_URL_POLYGON" },
+  130: { chain: unichain, label: "Unichain", rpcEnv: "RPC_URL_UNICHAIN" },
 } as const;
 
 type ChainId = keyof typeof CHAIN_CONFIG;
@@ -58,9 +72,17 @@ function ratioToPercent(numerator: bigint, denominator: bigint) {
 function parseUsdToWad(value: string | number | null | undefined) {
   if (value == null) return 0n;
   const asString = typeof value === "string" ? value : String(value);
+  if (asString.includes("e") || asString.includes("E")) {
+    const numeric = Number(asString);
+    if (!Number.isFinite(numeric)) return 0n;
+    const fixed = numeric.toFixed(18);
+    const [whole, fraction = ""] = fixed.split(".");
+    const paddedFraction = `${fraction}000000000000000000`.slice(0, 18);
+    return BigInt(whole || "0") * 10n ** 18n + BigInt(paddedFraction || "0");
+  }
   const [whole, fraction = ""] = asString.split(".");
   const paddedFraction = `${fraction}000000000000000000`.slice(0, 18);
-  return BigInt(whole || "0") * 10n ** 18n + BigInt(paddedFraction);
+  return BigInt(whole || "0") * 10n ** 18n + BigInt(paddedFraction || "0");
 }
 
 function computeTokenFromUsd(
@@ -200,16 +222,19 @@ async function fetchMorphoVaultV2(
 
 async function buildV2Allocations(
   address: `0x${string}`,
-  client: ReturnType<typeof createPublicClient>,
+  client: unknown,
   chainId: ChainId,
   assetSymbolFallback: string
 ) {
-  const accrualVaultV2 = await fetchAccrualVaultV2(address, client, { chainId });
+  const typedClient = client as PublicClient;
+  const accrualVaultV2 = await fetchAccrualVaultV2(address, typedClient, {
+    chainId,
+  });
   const tokenCache = new Map<string, Token>();
 
   const getToken = async (tokenAddress: `0x${string}`) => {
     if (tokenCache.has(tokenAddress)) return tokenCache.get(tokenAddress)!;
-    const token = await Token.fetch(tokenAddress, client, { chainId });
+    const token = await Token.fetch(tokenAddress, typedClient, { chainId });
     tokenCache.set(tokenAddress, token);
     return token;
   };
@@ -315,12 +340,19 @@ async function fetchVaultData(chainId: ChainId, address: `0x${string}`) {
     return { error: `Missing ${config.rpcEnv} environment variable.` };
   }
 
+  const transportSettings = (() => {
+    if (chainId === 143) {
+      return { batchSize: 30, wait: 20, retryCount: 2, retryDelay: 150 };
+    }
+    return { batchSize: 20, wait: 80, retryCount: 3, retryDelay: 250 };
+  })();
+
   const client = createPublicClient({
     chain: config.chain,
     transport: http(rpcUrl, {
-      batch: { batchSize: 50, wait: 50 },
-      retryCount: 3,
-      retryDelay: 200,
+      batch: { batchSize: transportSettings.batchSize, wait: transportSettings.wait },
+      retryCount: transportSettings.retryCount,
+      retryDelay: transportSettings.retryDelay,
     }),
   });
 
@@ -361,7 +393,17 @@ async function fetchVaultData(chainId: ChainId, address: `0x${string}`) {
     };
   }
 
-  const vault = await AccrualVault.fetch(address, client, { chainId });
+  let vault;
+  try {
+    vault = await AccrualVault.fetch(address, client, { chainId });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "RPC request failed.";
+    return {
+      error: `Vault RPC request failed. ${message.includes("429") ? "Rate limited by RPC." : message}`,
+    };
+  }
+
   const assetToken = await Token.fetch(vault.asset, client, { chainId });
   const vaultUsd = await fetchMorphoVaultUsd(chainId, address);
   const allocationEntries = Array.from(vault.allocations.values());
@@ -383,6 +425,7 @@ async function fetchVaultData(chainId: ChainId, address: `0x${string}`) {
           loanToken.symbol ?? assetToken.symbol ?? "Asset"
         }`,
         marketId: market.id,
+        vaultAddress: undefined,
         supplyAssets: allocation.position.supplyAssets,
         allocationUsd: loanToken.toUsd?.(allocation.position.supplyAssets) ?? null,
         cap: allocation.config.cap,
@@ -482,7 +525,7 @@ export default async function VaultPage({
                     <CopyButton value={address} />
                   </span>
                 </div>
-                <h1 className="text-4xl font-medium tracking-tight text-[#e38898] sm:text-6xl">
+                <h1 className="text-4xl font-medium tracking-tight text-zinc-50 sm:text-6xl">
                   {name || symbol}
                 </h1>
                 <div className="flex items-center gap-2 text-sm text-zinc-300">
@@ -526,7 +569,7 @@ export default async function VaultPage({
                 <VaultActions
                   chainId={chainId}
                   vaultAddress={address}
-                  assetAddress={assetToken.address}
+                  assetAddress={assetToken.address as `0x${string}`}
                   assetSymbol={assetSymbol}
                   assetDecimals={assetToken.decimals}
                   vaultDecimals={vaultDecimals}
@@ -558,9 +601,6 @@ export default async function VaultPage({
                     className="grid grid-cols-5 items-center gap-4 px-6 py-5 text-sm text-zinc-200"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1f2937] text-xs">
-                        {allocation.label.slice(0, 1)}
-                      </span>
                       <div className="space-y-1">
                         <p className="flex items-center gap-2 text-sm font-medium text-zinc-100">
                           {allocation.vaultAddress ? (

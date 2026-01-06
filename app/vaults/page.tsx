@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function EarnIndexPage() {
+export default function VaultsIndexPage() {
   redirect("/vaults/8453");
 }
